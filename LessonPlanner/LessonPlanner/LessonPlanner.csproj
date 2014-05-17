@@ -54,12 +54,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Algorithm.cs" />
-    <Compile Include="Classroom.cs" />
-    <Compile Include="Course.cs" />
-    <Compile Include="CourseClass.cs" />
-    <Compile Include="ExampleData.cs" />
-    <Compile Include="StudentGroup.cs" />
+    <Compile Include="Algorithm\Algorithm.cs" />
+    <Compile Include="Algorithm\Configuration.cs" />
+    <Compile Include="Algorithm\Consts.cs" />
+    <Compile Include="Algorithm\Helper.cs" />
+    <Compile Include="Algorithm\IEntity.cs" />
+    <Compile Include="Algorithm\Room.cs" />
+    <Compile Include="Algorithm\Course.cs" />
+    <Compile Include="Algorithm\CourseClass.cs" />
+    <Compile Include="Algorithm\ExampleData.cs" />
+    <Compile Include="Algorithm\Schedule.cs" />
+    <Compile Include="Algorithm\StudentGroup.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -74,7 +79,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Professor.cs" />
+    <Compile Include="Algorithm\Professor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
