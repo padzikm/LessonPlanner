@@ -19,7 +19,7 @@ namespace LessonPlanner
             }
         }
         public int LessonDuration { get; set; }
-        public bool IsLabRequireq { get; set; }
+        public bool IsLabRequired { get; set; }
 
         // Returns TRUE if another class has one or overlapping student groups.
         public bool GroupsOverlap(CourseClass courseClass)

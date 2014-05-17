@@ -35,8 +35,6 @@ namespace LessonPlanner
 
         private static readonly Random random = new Random();
 
-
-
         // Initializes chromosomes with configuration block (setup of chromosome)
         public Schedule(int numberOfCrossoverPoints, int mutationSize, int crossoverProbability, int mutationProbability)
         {
@@ -46,41 +44,31 @@ namespace LessonPlanner
             MutationProbability = mutationProbability;
             Fitness = 0;
             // reserve space for time-space slots in chromosomes code
-            //Slots = new List<List<CourseClass>>(Consts.DayCount * Consts.DayHours * Configuration::GetInstance().GetNumberOfRooms() );
+            Slots = new List<List<CourseClass>>(Consts.DayCount * Consts.DayHours * Configuration.Instance.GetNumberOfRooms() );
 
             // reserve space for flags of class requirements
-            //Criteria.resize( Configuration::GetInstance().GetNumberOfCourseClasses() * 5 );
+            Criteria = new List<bool>(Configuration.Instance.GetNumberOfCourseClasses() * 5);
         }
 
         // Copy constructor
         public Schedule(Schedule c, bool setupOnly)
         {
-            //        if( !setupOnly )
-            //{
-            //    // copy code
-            //    _slots = c._slots;
-            //    _classes = c._classes;
-
-            //    // copy flags of class requirements
-            //    _criteria = c._criteria;
-
-            //    // copy fitness
-            //    _fitness = c._fitness;
-            //}
-            //else
-            //{
-            //    // reserve space for time-space slots in chromosomes code
-            //    _slots.resize( DAYS_NUM * DAY_HOURS * Configuration::GetInstance().GetNumberOfRooms() );
-
-            //    // reserve space for flags of class requirements
-            //    _criteria.resize( Configuration::GetInstance().GetNumberOfCourseClasses() * 5 );
-            //}
-
-            //// copy parameters
-            //_numberOfCrossoverPoints = c._numberOfCrossoverPoints;
-            //_mutationSize = c._mutationSize;
-            //_crossoverProbability = c._crossoverProbability;
-            //_mutationProbability = c._mutationProbability;
+            if (setupOnly)
+            {
+                Slots = c.Slots;
+                Classes = c.Classes;
+                Criteria = c.Criteria;
+                Fitness = c.Fitness;
+            }
+            else
+            {
+                Slots = new List<List<CourseClass>>(Consts.DayCount * Consts.DayHours * Configuration.Instance.GetNumberOfRooms());
+                Criteria = new List<bool>(Configuration.Instance.GetNumberOfCourseClasses() * 5);
+                NumberOfCrossoverPoints = c.NumberOfCrossoverPoints;
+                MutationSize = c.MutationSize;
+                MutationProbability = c.MutationProbability;
+                CrossoverProbability = c.CrossoverProbability;
+            }
         }
 
         // Makes copy ot chromosome
@@ -92,21 +80,20 @@ namespace LessonPlanner
         // Makes new chromosome with same setup but with randomly chosen code
         public Schedule MakeNewFromPrototype()
         {
-            //        // number of time-space slots
+            // number of time-space slots
             int size = Slots.Count;
 
             //// make new chromosome, copy chromosome setup
             Schedule newChromosome = new Schedule(this, true);
             // place classes at random position
-            var configuration = new Configuration();
-            configuration.FillExampleData();
+
             List<CourseClass> c = new List<CourseClass>();
 
             //const list<CourseClass*>& c = Configuration::GetInstance().GetCourseClasses();
             foreach (var courseClass in c)
             {
                 // determine random position of class
-                int nr = configuration.GetNumberOfRooms();
+                int nr = Configuration.Instance.GetNumberOfRooms();
                 int duration = courseClass.LessonDuration;
                 int day = random.Next(0, Consts.DayCount);
                 int room = random.Next(0, nr);
@@ -195,8 +182,6 @@ namespace LessonPlanner
         public void Mutation()
         {
 
-            var configuration = new Configuration();
-            configuration.FillExampleData();
             //check probability of mutation operation
             if (random.Next(100) > MutationProbability)
                 return;
@@ -212,12 +197,11 @@ namespace LessonPlanner
             {
                 // select ranom chromosome for movement
                 int mpos = random.Next(numberOfClasses);
-                int pos1 = 0;
                 CourseClass cc1 = Classes.ElementAt(mpos).Key;
 
-                pos1 = Classes.ElementAt(mpos).Value;
+                int pos1 = Classes.ElementAt(mpos).Value;
 
-                int nr = configuration.GetNumberOfRooms();
+                int nr = Configuration.Instance.GetNumberOfRooms();
                 int duration = cc1.LessonDuration;
                 int day = random.Next(0, Consts.DayCount);
                 int room = random.Next(0, nr);
@@ -227,7 +211,6 @@ namespace LessonPlanner
                 for (int j = duration - 1; j >= 0; j--)
                 {
                     // remove class hour from current time-space slot
-
                     List<CourseClass> cl = Slots[pos1 + 1];
                     for (int k = 0; k < cl.Count; k++)
                     {
@@ -247,10 +230,8 @@ namespace LessonPlanner
         {
             // chromosome's score
             int score = 0;
-            var configuration = new Configuration();
-            configuration.FillExampleData();
 
-            int numberOfRooms = configuration.GetNumberOfRooms();
+            int numberOfRooms = Configuration.Instance.GetNumberOfRooms();
             int daySize = Consts.DayHours * numberOfRooms;
 
             int ci = 0;
@@ -277,7 +258,7 @@ namespace LessonPlanner
                         score++;
                     Criteria[ci + 0] = !ro;
                     CourseClass courseClass = classValue.Key;
-                    Room roomInstance = configuration.GetRoomById(room);
+                    Room roomInstance = Configuration.Instance.GetRoomById(room);
                     // does current room have enough seats
                     //TODO Criteria[ci + 1] = roomInstance.SeatCount >= courseClass.SeatCount;
                     if (Criteria[ci + 1])
@@ -321,7 +302,7 @@ namespace LessonPlanner
                     }
 
                     // calculate fitess value based on score
-                    Fitness = (float)score / (configuration.GetNumberOfCourseClasses() * Consts.DayCount);
+                    Fitness = (float)score / (Configuration.Instance.GetNumberOfCourseClasses() * Consts.DayCount);
                 }
                 ci += 5;
             }

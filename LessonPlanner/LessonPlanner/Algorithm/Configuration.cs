@@ -4,6 +4,12 @@ namespace LessonPlanner
 {
     class Configuration
     {
+        private static Configuration instance;
+
+        public static Configuration Instance
+        {
+            get { return instance ?? (instance = new Configuration()); }
+        }
         // Parsed professors
         public Dictionary<int, Professor> Professors { get; set; }
 
@@ -22,8 +28,10 @@ namespace LessonPlanner
         // Inidicate that configuration is not prsed yet
         public bool IsEmpty { get; set; }
 
+
+
         // Initialize data
-        public Configuration()
+        private Configuration()
         {
             IsEmpty = true;
         }
