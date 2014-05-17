@@ -38,40 +38,37 @@ namespace LessonPlanner
         // Tries to add chromosomes in best chromosome group
         private void AddToBest(int chromosomeIndex)
         {
-            //// don't add if new chromosome hasn't fitness big enough for best chromosome group
-            //// or it is already in the group?
-            //if ((_currentBestSize == (int)_bestChromosomes.size() &&
-            //    _chromosomes[_bestChromosomes[_currentBestSize - 1]]->GetFitness() >=
-            //    _chromosomes[chromosomeIndex]->GetFitness()) || _bestFlags[chromosomeIndex])
-            //    return;
+            // don't add if new chromosome hasn't fitness big enough for best chromosome group
+            // or it is already in the group?
+            if ((CurrentBestSize == BestChromosomes.Count && Chromosomes[BestChromosomes[CurrentBestSize - 1]].Fitness >= Chromosomes[chromosomeIndex].Fitness) || BestFlags[chromosomeIndex])
+                return;
 
-            //// find place for new chromosome
-            //int i = _currentBestSize;
-            //for (; i > 0; i--)
-            //{
-            //    // group is not full?
-            //    if (i < (int)_bestChromosomes.size())
-            //    {
-            //        // position of new chromosomes is found?
-            //        if (_chromosomes[_bestChromosomes[i - 1]]->GetFitness() >
-            //            _chromosomes[chromosomeIndex]->GetFitness())
-            //            break;
+            // find place for new chromosome
+            int i = CurrentBestSize;
+            for (; i > 0; i--)
+            {
+                // group is not full?
+                if (i < BestChromosomes.Count)
+                {
+                    // position of new chromosomes is found?
+                    if (Chromosomes[BestChromosomes[i - 1]].Fitness > Chromosomes[chromosomeIndex].Fitness)
+                        break;
 
-            //        // move chromosomes to make room for new
-            //        _bestChromosomes[i] = _bestChromosomes[i - 1];
-            //    }
-            //    else
-            //        // group is full remove worst chromosomes in the group
-            //        _bestFlags[_bestChromosomes[i - 1]] = false;
-            //}
+                    // move chromosomes to make room for new
+                    BestChromosomes[i] = BestChromosomes[i - 1];
+                }
+                else
+                    // group is full remove worst chromosomes in the group
+                    BestFlags[BestChromosomes[i - 1]] = false;
+            }
 
-            //// store chromosome in best chromosome group
-            //_bestChromosomes[i] = chromosomeIndex;
-            //_bestFlags[chromosomeIndex] = true;
+            // store chromosome in best chromosome group
+            BestChromosomes[i] = chromosomeIndex;
+            BestFlags[chromosomeIndex] = true;
 
-            //// increase current size if it has not reached the limit yet
-            //if (_currentBestSize < (int)_bestChromosomes.size())
-            //    _currentBestSize++;
+            // increase current size if it has not reached the limit yet
+            if (CurrentBestSize < BestChromosomes.Count)
+                CurrentBestSize++;
         }
 
         // Returns TRUE if chromosome belongs to best chromosome group
@@ -91,38 +88,29 @@ namespace LessonPlanner
 
         public Algorithm(int numberOfChromosomes, int replaceByGeneration, int trackBest, Schedule prototype)
         {
-            //ReplaceByGeneration = replaceByGeneration;
-            //CurrentBestSize = 0;
-            //Prototype = prototype;
-            //CurrentGeneration = 0;
-            //State = AlgorithmState.Userstopped;
+            ReplaceByGeneration = replaceByGeneration;
+            CurrentBestSize = 0;
+            Prototype = prototype;
+            CurrentGeneration = 0;
+            State = AlgorithmState.Userstopped;
 
-            //// there should be at least 2 chromosomes in population
-            //if (numberOfChromosomes < 2)
-            //    numberOfChromosomes = 2;
+            // there should be at least 2 chromosomes in population
+            if (numberOfChromosomes < 2)
+                numberOfChromosomes = 2;
 
-            //// and algorithm should track at least on of best chromosomes
-            //if (trackBest < 1)
-            //    trackBest = 1;
+            // and algorithm should track at least on of best chromosomes
+            if (trackBest < 1)
+                trackBest = 1;
 
-            //if (_replaceByGeneration < 1)
-            //    _replaceByGeneration = 1;
-            //else if (_replaceByGeneration > numberOfChromosomes - trackBest)
-            //    _replaceByGeneration = numberOfChromosomes - trackBest;
+            if (ReplaceByGeneration < 1)
+                ReplaceByGeneration = 1;
+            else if (ReplaceByGeneration > numberOfChromosomes - trackBest)
+                ReplaceByGeneration = numberOfChromosomes - trackBest;
 
-            //// reserve space for population
-            //_chromosomes.resize(numberOfChromosomes);
-            //_bestFlags.resize(numberOfChromosomes);
-
-            //// reserve space for best chromosome group
-            //_bestChromosomes.resize(trackBest);
-
-            //// clear population
-            //for (int i = (int)_chromosomes.size() - 1; i >= 0; --i)
-            //{
-            //    _chromosomes[i] = NULL;
-            //    _bestFlags[i] = false;
-            //}
+            // reserve space for population
+            Chromosomes = new List<Schedule>(numberOfChromosomes);
+            BestFlags = new List<bool>(numberOfChromosomes);
+            BestChromosomes = new List<int>(trackBest);
         }
 
         // Starts and executes algorithm

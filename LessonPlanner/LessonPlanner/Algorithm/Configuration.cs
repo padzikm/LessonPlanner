@@ -31,7 +31,8 @@ namespace LessonPlanner
         // Parse file and store parsed object
         public void ParseFile(string fileName)
         {
-
+            this.FillExampleData();
+            IsEmpty = false;
         }
 
         // Returns number of parsed professors
