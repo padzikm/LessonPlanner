@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Windows;
 
 namespace LessonPlanner
 {
@@ -28,6 +32,10 @@ namespace LessonPlanner
         // Class table for chromosome
         // Used to determine first time-space slot used by class
         public Dictionary<CourseClass, int> Classes { get; set; }
+
+        private static readonly Random random = new Random();
+
+
 
         // Initializes chromosomes with configuration block (setup of chromosome)
         public Schedule(int numberOfCrossoverPoints, int mutationSize, int crossoverProbability, int mutationProbability)
@@ -85,261 +93,241 @@ namespace LessonPlanner
         public Schedule MakeNewFromPrototype()
         {
             //        // number of time-space slots
-            //int size = (int)_slots.size();
+            int size = Slots.Count;
 
             //// make new chromosome, copy chromosome setup
-            //Schedule* newChromosome = new Schedule( *this, true );
+            Schedule newChromosome = new Schedule(this, true);
+            // place classes at random position
+            var configuration = new Configuration();
+            configuration.FillExampleData();
+            List<CourseClass> c = new List<CourseClass>();
 
-            //// place classes at random position
             //const list<CourseClass*>& c = Configuration::GetInstance().GetCourseClasses();
-            //for( list<CourseClass*>::const_iterator it = c.begin(); it != c.end(); it++ )
-            //{
-            //    // determine random position of class
-            //    int nr = Configuration::GetInstance().GetNumberOfRooms();
-            //    int dur = ( *it )->GetDuration();
-            //    int day = rand() % DAYS_NUM;
-            //    int room = rand() % nr;
-            //    int time = rand() % ( DAY_HOURS + 1 - dur );
-            //    int pos = day * nr * DAY_HOURS + room * DAY_HOURS + time;
+            foreach (var courseClass in c)
+            {
+                // determine random position of class
+                int nr = configuration.GetNumberOfRooms();
+                int duration = courseClass.LessonDuration;
+                int day = random.Next(0, Consts.DayCount);
+                int room = random.Next(0, nr);
+                int time = random.Next(0, Consts.DayHours + 1 - duration);
+                int pos = day * nr * Consts.DayCount;
+                // fill time-space slots, for each hour of class
+                for (int i = duration - 1; i >= 0; i--)
+                    newChromosome.Slots[pos + i].Add(courseClass);
+                // insert in class table of chromosome
+                newChromosome.Classes.Add(courseClass, pos);
 
-            //    // fill time-space slots, for each hour of class
-            //    for( int i = dur - 1; i >= 0; i-- )
-            //        newChromosome->_slots.at( pos + i ).push_back( *it );
-
-            //    // insert in class table of chromosome
-            //    newChromosome->_classes.insert( pair<CourseClass*, int>( *it, pos ) );
-            //}
-
-            //newChromosome->CalculateFitness();
-
-            //// return smart pointer
-            //return newChromosome;
-            return null;
+            }
+            newChromosome.CalculateFitness();
+            return newChromosome;
         }
 
         // Performes crossover operation using to chromosomes and returns pointer to offspring
         public Schedule Crossover(Schedule parent2)
         {
             //        // check probability of crossover operation
-            //if( rand() % 100 > _crossoverProbability )
-            //    // no crossover, just copy first parent
-            //    return new Schedule( *this, false );
+            if (random.Next(100) > CrossoverProbability)
+                // no crossover, just copy first parent
+                return new Schedule(this, false);
 
-            //// new chromosome object, copy chromosome setup
-            //Schedule* n = new Schedule( *this, true );
+            // new chromosome object, copy chromosome setup
+            Schedule n = new Schedule(this, true);
 
             //// number of classes
             //int size = (int)_classes.size();
+            int size = Classes.Count;
 
-            //vector<bool> cp( size );
+            List<bool> cp = new List<bool>(size);
 
-            //// determine crossover point (randomly)
-            //for( int i = _numberOfCrossoverPoints; i > 0; i-- )
-            //{
-            //    while( 1 )
-            //    {
-            //        int p = rand() % size;
-            //        if( !cp[ p ] )
-            //        {
-            //            cp[ p ] = true;
-            //            break;
-            //        }
-            //    }
-            //}
+            // determine crossover point (randomly)
+            for (int i = NumberOfCrossoverPoints; i > 0; i--)
+            {
+                while (true)
+                {
+                    int p = random.Next(size);
+                    if (!cp[p])
+                    {
+                        cp[p] = true;
+                        break;
+                    }
+                }
+            }
+            // make new code by combining parent codes
+            bool first = random.Next(2) == 0;
 
-            //hash_map<CourseClass*, int>::const_iterator it1 = _classes.begin();
-            //hash_map<CourseClass*, int>::const_iterator it2 = parent2._classes.begin();
+            for (int i = 0, k = 0, j = 0; i < size; i++, j++, k++)
+            {
+                if (first)
+                {
+                    // insert class from first parent into new chromosome's calss table
+                    var classValue = Classes.ElementAt(k);
+                    n.Classes.Add(classValue.Key, classValue.Value);
+                    // all time-space slots of class are copied
+                    for (int x = classValue.Key.LessonDuration - 1; x >= 0; x--)
+                    {
+                        n.Slots[classValue.Value + x].Add(classValue.Key);
+                    }
 
-            //// make new code by combining parent codes
-            //bool first = rand() % 2 == 0;
-            //for( int i = 0; i < size; i++ )
-            //{
-            //    if( first )
-            //    {
-            //        // insert class from first parent into new chromosome's calss table
-            //        n->_classes.insert( pair<CourseClass*, int>( ( *it1 ).first, ( *it1 ).second ) );
-            //        // all time-space slots of class are copied
-            //        for( int i = ( *it1 ).first->GetDuration() - 1; i >= 0; i-- )
-            //            n->_slots[ ( *it1 ).second + i ].push_back( ( *it1 ).first );
-            //    }
-            //    else
-            //    {
-            //        // insert class from second parent into new chromosome's calss table
-            //        n->_classes.insert( pair<CourseClass*, int>( ( *it2 ).first, ( *it2 ).second ) );
-            //        // all time-space slots of class are copied
-            //        for( int i = ( *it2 ).first->GetDuration() - 1; i >= 0; i-- )
-            //            n->_slots[ ( *it2 ).second + i ].push_back( ( *it2 ).first );
-            //    }
+                }
+                else
+                {
+                    // insert class from second parent into new chromosome's calss table
 
-            //    // crossover point
-            //    if( cp[ i ] )
-            //        // change soruce chromosome
-            //        first = !first;
+                    var classValue = parent2.Classes.ElementAt(j);
+                    n.Classes.Add(classValue.Key, classValue.Value);
+                    // all time-space slots of class are copied
+                    for (int x = classValue.Key.LessonDuration - 1; x >= 0; x--)
+                    {
+                        n.Slots[classValue.Value + x].Add(classValue.Key);
+                    }
+                    //crossover point
+                    if (cp[i])
+                        first = !first;
 
-            //    it1++;
-            //    it2++;
-            //}
-
-            //n->CalculateFitness();
-
-            //// return smart pointer to offspring
-            //return n;
-            return null;
+                }
+                CalculateFitness();
+            }
+            return n;
         }
 
         // Performs mutation on chromosome
         public void Mutation()
         {
-            //        // check probability of mutation operation
-            //if( rand() % 100 > _mutationProbability )
-            //    return;
 
-            //// number of classes
-            //int numberOfClasses = (int)_classes.size();
-            //// number of time-space slots
-            //int size = (int)_slots.size();
+            var configuration = new Configuration();
+            configuration.FillExampleData();
+            //check probability of mutation operation
+            if (random.Next(100) > MutationProbability)
+                return;
 
-            //// move selected number of classes at random position
-            //for( int i = _mutationSize; i > 0; i-- )
-            //{
-            //    // select ranom chromosome for movement
-            //    int mpos = rand() % numberOfClasses;
-            //    int pos1 = 0;
-            //    hash_map<CourseClass*, int>::iterator it = _classes.begin();
-            //    for( ; mpos > 0; it++, mpos-- )
-            //        ;
 
-            //    // current time-space slot used by class
-            //    pos1 = ( *it ).second;
+            // number of classes
+            int numberOfClasses = Classes.Count;
+            // number of time-space slots
+            int size = Slots.Count;
 
-            //    CourseClass* cc1 = ( *it ).first;
+            // move selected number of classes at random position
+            for (int i = MutationSize; i > 0; i--)
+            {
+                // select ranom chromosome for movement
+                int mpos = random.Next(numberOfClasses);
+                int pos1 = 0;
+                CourseClass cc1 = Classes.ElementAt(mpos).Key;
 
-            //    // determine position of class randomly
-            //    int nr = Configuration::GetInstance().GetNumberOfRooms();
-            //    int dur = cc1->GetDuration();
-            //    int day = rand() % DAYS_NUM;
-            //    int room = rand() % nr;
-            //    int time = rand() % ( DAY_HOURS + 1 - dur );
-            //    int pos2 = day * nr * DAY_HOURS + room * DAY_HOURS + time;
+                pos1 = Classes.ElementAt(mpos).Value;
 
-            //    // move all time-space slots
-            //    for( int i = dur - 1; i >= 0; i-- )
-            //    {
-            //        // remove class hour from current time-space slot
-            //        list<CourseClass*>& cl = _slots[ pos1 + i ];
-            //        for( list<CourseClass*>::iterator it = cl.begin(); it != cl.end(); it++ )
-            //        {
-            //            if( *it == cc1 )
-            //            {
-            //                cl.erase( it );
-            //                break;
-            //            }
-            //        }
+                int nr = configuration.GetNumberOfRooms();
+                int duration = cc1.LessonDuration;
+                int day = random.Next(0, Consts.DayCount);
+                int room = random.Next(0, nr);
+                int time = random.Next(0, Consts.DayHours + 1 - duration);
+                int pos2 = day * nr * Consts.DayHours + room * Consts.DayHours + time;
+                // move all time-space slots
+                for (int j = duration - 1; j >= 0; j--)
+                {
+                    // remove class hour from current time-space slot
 
-            //        // move class hour to new time-space slot
-            //        _slots.at( pos2 + i ).push_back( cc1 );
-            //    }
-
-            //    // change entry of class table to point to new time-space slots
-            //    _classes[ cc1 ] = pos2;
+                    List<CourseClass> cl = Slots[pos1 + 1];
+                    for (int k = 0; k < cl.Count; k++)
+                    {
+                        if (cl[k] == cc1)
+                            cl.Remove(cl[k]);
+                    }
+                    // move class hour to new time-space slot
+                    Slots[pos2 + i].Add(cc1);
+                }
+                // change entry of class table to point to new time-space slots
+                Classes[cc1] = pos2;
+            }
         }
 
         // Calculates fitness value of chromosome
         public void CalculateFitness()
         {
-            //            // chromosome's score
-            //    int score = 0;
+            // chromosome's score
+            int score = 0;
+            var configuration = new Configuration();
+            configuration.FillExampleData();
 
-            //    int numberOfRooms = Configuration::GetInstance().GetNumberOfRooms();
-            //    int daySize = DAY_HOURS * numberOfRooms;
+            int numberOfRooms = configuration.GetNumberOfRooms();
+            int daySize = Consts.DayHours * numberOfRooms;
 
-            //    int ci = 0;
+            int ci = 0;
 
-            //    // check criterias and calculate scores for each class in schedule
-            //    for( hash_map<CourseClass*, int>::const_iterator it = _classes.begin(); it != _classes.end(); ++it, ci += 5 )
-            //    {
-            //        // coordinate of time-space slot
-            //        int p = ( *it ).second;
-            //        int day = p / daySize;
-            //        int time = p % daySize;
-            //        int room = time / DAY_HOURS;
-            //        time = time % DAY_HOURS;
+            // check criterias and calculate scores for each class in schedule
+            foreach (var classValue in Classes)
+            {
+                int p = classValue.Value;
+                int day = p / daySize;
+                int time = p % daySize;
+                int room = time % Consts.DayHours;
+                time = time % Consts.DayHours;
 
-            //        int dur = ( *it ).first->GetDuration();
+                int duration = classValue.Key.LessonDuration;
+                bool ro = false;
+                for (int i = duration - 1; i >= 0; i--)
+                {
+                    if (Slots[p + i].Count > 1)
+                    {
+                        ro = true;
+                        break;
+                    }
+                    if (!ro)
+                        score++;
+                    Criteria[ci + 0] = !ro;
+                    CourseClass courseClass = classValue.Key;
+                    Room roomInstance = configuration.GetRoomById(room);
+                    // does current room have enough seats
+                    //TODO Criteria[ci + 1] = roomInstance.SeatCount >= courseClass.SeatCount;
+                    if (Criteria[ci + 1])
+                        score++;
+                    Criteria[ci + 2] = !courseClass.IsLabRequired || courseClass.IsLabRequired && roomInstance.IsLab;
+                    if (Criteria[ci + 1])
+                        score++;
 
-            //        // check for room overlapping of classes
-            //        bool ro = false;
-            //        for( int i = dur - 1; i >= 0; i-- )
-            //        {
-            //            if( _slots[ p + i ].size() > 1 )
-            //            {
-            //                ro = true;
-            //                break;
-            //            }
-            //        }
+                    bool po = false, go = false;
+                    // does current room have enough seats
+                    for (int j = numberOfRooms, t = day * daySize + time; j > 0; j--, t += Consts.DayHours)
+                    {
+                        for (int k = duration - 1; k >= 0; k--)
+                        {
+                            List<CourseClass> cl = Slots[t + i];
+                            foreach (var clValue in cl)
+                            {
+                                if (courseClass != clValue)
+                                {
+                                    // professor overlaps?
+                                    if (!po && courseClass.ProfessorOverlaps(clValue))
+                                        po = true;
+                                    if (!go && courseClass.GroupsOverlap(clValue))
+                                        go = true;
+                                    if (po && go)
+                                        goto total_overlap;
+                                }
+                            }
+                        }
+                    }
+                total_overlap:
+                    {
+                        if (!po)
+                            score++;
+                        Criteria[ci + 3] = !po;
 
-            //        // on room overlaping
-            //        if( !ro )
-            //            score++;
+                        // student groups has no overlaping classes?
+                        if (!go)
+                            score++;
+                        Criteria[ci + 4] = !go;
+                    }
 
-            //        _criteria[ ci + 0 ] = !ro;
+                    // calculate fitess value based on score
+                    Fitness = (float)score / (configuration.GetNumberOfCourseClasses() * Consts.DayCount);
+                }
+                ci += 5;
+            }
 
-            //        CourseClass* cc = ( *it ).first;
-            //        Room* r = Configuration::GetInstance().GetRoomById( room );
-            //        // does current room have enough seats
-            //        _criteria[ ci + 1 ] = r->GetNumberOfSeats() >= cc->GetNumberOfSeats();
-            //        if( _criteria[ ci + 1 ] )
-            //            score++;
 
-            //        // does current room have computers if they are required
-            //        _criteria[ ci + 2 ] = !cc->IsLabRequired() || ( cc->IsLabRequired() && r->IsLab() );
-            //        if( _criteria[ ci + 2 ] )
-            //            score++;
-
-            //        bool po = false, go = false;
-            //        // check overlapping of classes for professors and student groups
-            //        for( int i = numberOfRooms, t = day * daySize + time; i > 0; i--, t += DAY_HOURS )
-            //        {
-            //            // for each hour of class
-            //            for( int i = dur - 1; i >= 0; i-- )
-            //            {
-            //                // check for overlapping with other classes at same time
-            //                const list<CourseClass*>& cl = _slots[ t + i ];
-            //                for( list<CourseClass*>::const_iterator it = cl.begin(); it != cl.end(); it++ )
-            //                {
-            //                    if( cc != *it )
-            //                    {
-            //                        // professor overlaps?
-            //                        if( !po && cc->ProfessorOverlaps( **it ) )
-            //                            po = true;
-
-            //                        // student group overlaps?
-            //                        if( !go && cc->GroupsOverlap( **it ) )
-            //                            go = true;
-
-            //                        // both type of overlapping? no need to check more
-            //                        if( po && go )
-            //                            goto total_overlap;
-            //                    }
-            //                }
-            //            }
-            //        }
-
-            //total_overlap:
-
-            //        // professors have no overlaping classes?
-            //        if( !po )
-            //            score++;
-            //        _criteria[ ci + 3 ] = !po;
-
-            //        // student groups has no overlaping classes?
-            //        if( !go )
-            //            score++;
-            //        _criteria[ ci + 4 ] = !go;
-            //    }
-
-            //    // calculate fitess value based on score
-            //    _fitness = (float)score / ( Configuration::GetInstance().GetNumberOfCourseClasses() * DAYS_NUM );
         }
+
     }
 }
