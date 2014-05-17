@@ -2,7 +2,7 @@
 {
     static class Consts
     {
-        public static int DayHours = 12;
-        public static int DayCount = 5;
+        public const int DayHours = 12;
+        public const int DayCount = 5;
     }
 }

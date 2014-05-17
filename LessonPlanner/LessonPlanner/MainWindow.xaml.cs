@@ -23,6 +23,11 @@ namespace LessonPlanner
         public MainWindow()
         {
             InitializeComponent();
+            Configuration.Instance.FillExampleData();
+            Schedule schedule = new Schedule(2, 2, 80, 3);
+            Algorithm algorithm = new Algorithm(100, 8, 5, schedule);
+            algorithm.Start();
+
         }
     }
 }

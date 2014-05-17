@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace LessonPlanner
 {
-    class Schedule
+    public class Schedule
     {
         // Number of crossover points of parent's class tables
         public int NumberOfCrossoverPoints { get; set; }

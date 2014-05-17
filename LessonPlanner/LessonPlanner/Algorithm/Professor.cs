@@ -2,7 +2,7 @@
 
 namespace LessonPlanner
 {
-    class Professor : IEntity
+    public class Professor : IEntity
     {
         public int Id { get; set; }
         public string Name { get; set; }

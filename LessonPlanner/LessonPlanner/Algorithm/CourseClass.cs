@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace LessonPlanner
 {
-    class CourseClass
+    public class CourseClass
     {
         public Course Course { get; set; }
         public Professor Professor { get; set; }
