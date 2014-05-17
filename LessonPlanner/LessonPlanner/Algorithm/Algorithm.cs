@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace LessonPlanner
 {
@@ -116,108 +117,81 @@ namespace LessonPlanner
         // Starts and executes algorithm
         public void Start()
         {
-            //        if( !_prototype )
-            //    return;
+            if (Prototype == null)
+                return;
 
-            //CSingleLock lock( &_stateSect, TRUE );
+            // do not run already running algorithm
+            if (State == AlgorithmState.Running)
+                return;
 
-            //// do not run already running algorithm
-            //if( _state == AS_RUNNING )
-            //    return;
+            State = AlgorithmState.Running;
 
-            //_state = AS_RUNNING;
+            // clear best chromosome group from previous execution
+            ClearBest();
 
-            //lock.Unlock();
+            // initialize new population with chromosomes randomly built using prototype
+            for (int i = 0; i < Chromosomes.Count; ++i)
+            {
+                // remove chromosome from previous execution
+                Chromosomes[i] = null;
 
-            //if( _observer )
-            //    // notify observer that execution of algorithm has changed it state
-            //    _observer->EvolutionStateChanged( _state );
+                // add new chromosome to population
+                Chromosomes[i] = Prototype.MakeNewFromPrototype();
+                AddToBest(i);
+            }
 
-            //// clear best chromosome group from previous execution
-            //ClearBest();
+            Random random = new Random(12345);
+            CurrentGeneration = 0;
 
-            //// initialize new population with chromosomes randomly built using prototype
-            //int i = 0;
-            //for( vector<Schedule*>::iterator it = _chromosomes.begin(); it != _chromosomes.end(); ++it, ++i )
-            //{
-            //    // remove chromosome from previous execution
-            //    if( *it )
-            //        delete *it;
+            while (true)
+            {
+                // user has stopped execution?
+                if (State != AlgorithmState.Running)
+                    break;
 
-            //    // add new chromosome to population
-            //    *it = _prototype->MakeNewFromPrototype();
-            //    AddToBest( i );
-            //}
+                Schedule best = GetBestChromosome();
 
-            //_currentGeneration = 0;
+                // algorithm has reached criteria?
+                if (best.Fitness >= 1)
+                {
+                    State = AlgorithmState.Criteriastopped;
+                    break;
+                }
 
-            //while( 1 )
-            //{
-            //    lock.Lock();
+                // produce offepsing
+                List<Schedule> offspring = new List<Schedule>(ReplaceByGeneration);
+                for (int j = 0; j < ReplaceByGeneration; ++j)
+                {
+                    // selects parent randomly
+                    Schedule p1 = Chromosomes[random.Next() % Chromosomes.Count];
+                    Schedule p2 = Chromosomes[random.Next() % Chromosomes.Count];
 
-            //    // user has stopped execution?
-            //    if( _state != AS_RUNNING )
-            //    {
-            //        lock.Unlock();
-            //        break;
-            //    }
+                    offspring[j] = p1.Crossover(p2);
+                    offspring[j].Mutation();
+                }
 
-            //    Schedule* best = GetBestChromosome();
+                // replace chromosomes of current operation with offspring
+                for (int j = 0; j < ReplaceByGeneration; ++j)
+                {
+                    int ci;
+                    do
+                    {
+                        // select chromosome for replacement randomly
+                        ci = random.Next() % Chromosomes.Count;
 
-            //    // algorithm has reached criteria?
-            //    if( best->GetFitness() >= 1 )
-            //    {
-            //        _state = AS_CRITERIA_STOPPED;
-            //        lock.Unlock();
-            //        break;
-            //    }
+                        // protect best chromosomes from replacement
+                    } while (IsInBest(ci));
 
-            //    lock.Unlock();
+                    // replace chromosomes
+                    Chromosomes[ci] = null;
+                    Chromosomes[ci] = offspring[j];
 
-            //    // produce offepsing
-            //    vector<Schedule*> offspring;
-            //    offspring.resize( _replaceByGeneration );
-            //    for( int j = 0; j < _replaceByGeneration; j++ )
-            //    {
-            //        // selects parent randomly
-            //        Schedule* p1 = _chromosomes[ rand() % _chromosomes.size() ];
-            //        Schedule* p2 = _chromosomes[ rand() % _chromosomes.size() ];
+                    // try to add new chromosomes in best chromosome group
+                    AddToBest(ci);
+                }
 
-            //        offspring[ j ] = p1->Crossover( *p2 );
-            //        offspring[ j ]->Mutation();
-            //    }
-
-            //    // replace chromosomes of current operation with offspring
-            //    for( int j = 0; j < _replaceByGeneration; j++ )
-            //    {
-            //        int ci;
-            //        do
-            //        {
-            //            // select chromosome for replacement randomly
-            //            ci = rand() % (int)_chromosomes.size();
-
-            //            // protect best chromosomes from replacement
-            //        } while( IsInBest( ci ) );
-
-            //        // replace chromosomes
-            //        delete _chromosomes[ ci ];
-            //        _chromosomes[ ci ] = offspring[ j ];
-
-            //        // try to add new chromosomes in best chromosome group
-            //        AddToBest( ci );
-            //    }
-
-            //    // algorithm has found new best chromosome
-            //    if( best != GetBestChromosome() && _observer )
-            //        // notify observer
-            //        _observer->NewBestChromosome( *GetBestChromosome() );
-
-            //    _currentGeneration++;
-            //}
-
-            //if( _observer )
-            //    // notify observer that execution of algorithm has changed it state
-            //    _observer->EvolutionStateChanged( _state );
+                ++CurrentGeneration;
+            }
         }
 
         // Stops execution of algorithm
