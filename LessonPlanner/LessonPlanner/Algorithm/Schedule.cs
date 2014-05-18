@@ -87,9 +87,7 @@ namespace LessonPlanner
             Schedule newChromosome = new Schedule(this, true);
             // place classes at random position
 
-            List<CourseClass> c = new List<CourseClass>();
-
-            //const list<CourseClass*>& c = Configuration::GetInstance().GetCourseClasses();
+            List<CourseClass> c = Configuration.Instance.CourseClasses;
             foreach (var courseClass in c)
             {
                 // determine random position of class
@@ -98,7 +96,7 @@ namespace LessonPlanner
                 int day = random.Next(0, Consts.DayCount);
                 int room = random.Next(0, nr);
                 int time = random.Next(0, Consts.DayHours + 1 - duration);
-                int pos = day * nr * Consts.DayCount;
+                int pos = day*nr*Consts.DayHours + room*Consts.DayHours + time;
                 // fill time-space slots, for each hour of class
                 for (int i = duration - 1; i >= 0; i--)
                     newChromosome.Slots[pos + i].Add(courseClass);

@@ -41,7 +41,7 @@ namespace LessonPlanner
         {
             // don't add if new chromosome hasn't fitness big enough for best chromosome group
             // or it is already in the group?
-            if ((CurrentBestSize == BestChromosomes.Count && Chromosomes[BestChromosomes[CurrentBestSize - 1]].Fitness >= Chromosomes[chromosomeIndex].Fitness) || BestFlags[chromosomeIndex])
+            if ((CurrentBestSize == BestChromosomes.Capacity && Chromosomes[BestChromosomes[CurrentBestSize - 1]].Fitness >= Chromosomes[chromosomeIndex].Fitness) || BestFlags[chromosomeIndex])
                 return;
 
             // find place for new chromosome
@@ -49,7 +49,7 @@ namespace LessonPlanner
             for (; i > 0; i--)
             {
                 // group is not full?
-                if (i < BestChromosomes.Count)
+                if (i < BestChromosomes.Capacity)
                 {
                     // position of new chromosomes is found?
                     if (Chromosomes[BestChromosomes[i - 1]].Fitness > Chromosomes[chromosomeIndex].Fitness)
@@ -68,7 +68,7 @@ namespace LessonPlanner
             BestFlags[chromosomeIndex] = true;
 
             // increase current size if it has not reached the limit yet
-            if (CurrentBestSize < BestChromosomes.Count)
+            if (CurrentBestSize < BestChromosomes.Capacity)
                 CurrentBestSize++;
         }
 
@@ -130,13 +130,13 @@ namespace LessonPlanner
             ClearBest();
 
             // initialize new population with chromosomes randomly built using prototype
-            for (int i = 0; i < Chromosomes.Count; ++i)
+            for (int i = 0; i < Chromosomes.Capacity; ++i)
             {
                 // remove chromosome from previous execution
-                Chromosomes[i] = null;
+                Chromosomes.Clear();
 
                 // add new chromosome to population
-                Chromosomes[i] = Prototype.MakeNewFromPrototype();
+                Chromosomes.Insert(i, Prototype.MakeNewFromPrototype());
                 AddToBest(i);
             }
 
