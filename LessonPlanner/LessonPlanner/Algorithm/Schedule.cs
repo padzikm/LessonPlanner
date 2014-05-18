@@ -45,9 +45,14 @@ namespace LessonPlanner
             Fitness = 0;
             // reserve space for time-space slots in chromosomes code
             Slots = new List<List<CourseClass>>(Consts.DayCount * Consts.DayHours * Configuration.Instance.GetNumberOfRooms() );
+            for (int i = 0; i < Consts.DayCount * Consts.DayHours * Configuration.Instance.GetNumberOfRooms(); i++)
+                Slots.Add(new List<CourseClass>());
 
             // reserve space for flags of class requirements
             Criteria = new List<bool>(Configuration.Instance.GetNumberOfCourseClasses() * 5);
+            for (int i = 0; i < Configuration.Instance.GetNumberOfCourseClasses() * 5; i++)
+                Criteria.Add(false);
+            Classes = new Dictionary<CourseClass, int>();
         }
 
         // Copy constructor
@@ -158,7 +163,6 @@ namespace LessonPlanner
                 else
                 {
                     // insert class from second parent into new chromosome's calss table
-
                     var classValue = parent2.Classes.ElementAt(j);
                     n.Classes.Add(classValue.Key, classValue.Value);
                     // all time-space slots of class are copied
@@ -258,7 +262,7 @@ namespace LessonPlanner
                     CourseClass courseClass = classValue.Key;
                     Room roomInstance = Configuration.Instance.GetRoomById(room);
                     // does current room have enough seats
-                    //TODO Criteria[ci + 1] = roomInstance.SeatCount >= courseClass.SeatCount;
+                    Criteria[ci + 1] = roomInstance.SeatCount >= courseClass.SeatCount;
                     if (Criteria[ci + 1])
                         score++;
                     Criteria[ci + 2] = !courseClass.IsLabRequired || courseClass.IsLabRequired && roomInstance.IsLab;

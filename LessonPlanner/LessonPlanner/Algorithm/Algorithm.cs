@@ -110,8 +110,16 @@ namespace LessonPlanner
 
             // reserve space for population
             Chromosomes = new List<Schedule>(numberOfChromosomes);
+
             BestFlags = new List<bool>(numberOfChromosomes);
             BestChromosomes = new List<int>(trackBest);
+            for (int i = 0; i < numberOfChromosomes; i++)
+            {
+                Chromosomes.Add(prototype);
+                BestFlags.Add(false);
+            }
+            for (int i = 0; i < trackBest; i++) BestChromosomes.Add(0);
+
         }
 
         // Starts and executes algorithm
@@ -133,10 +141,11 @@ namespace LessonPlanner
             for (int i = 0; i < Chromosomes.Capacity; ++i)
             {
                 // remove chromosome from previous execution
-                Chromosomes.Clear();
+                if (Chromosomes[i] != null)
+                    Chromosomes.RemoveAt(i);
 
                 // add new chromosome to population
-                Chromosomes.Insert(i, Prototype.MakeNewFromPrototype());
+                Chromosomes[i] = Prototype.MakeNewFromPrototype();
                 AddToBest(i);
             }
 
