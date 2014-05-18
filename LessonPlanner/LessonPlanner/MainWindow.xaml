@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <ScrollViewer HorizontalScrollBarVisibility="Visible">
+            <Label x:Name="result" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Stretch" Background="BlueViolet"/>
+        </ScrollViewer>
     </Grid>
 </Window>

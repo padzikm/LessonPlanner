@@ -58,22 +58,39 @@ namespace LessonPlanner
         // Copy constructor
         public Schedule(Schedule c, bool setupOnly)
         {
-            if (setupOnly)
+            if (!setupOnly)
             {
-                Slots = c.Slots;
-                Classes = c.Classes;
-                Criteria = c.Criteria;
+                Slots = new List<List<CourseClass>>(c.Slots.Count);
+                foreach (var tmp in c.Slots)
+                {
+                    var list = new List<CourseClass>(tmp.Count);
+                    foreach (var el in tmp)
+                        list.Add((CourseClass)el.Clone());
+                }
+
+                Classes = new Dictionary<CourseClass, int>(c.Classes.Count);
+                foreach (var tmp in c.Classes)
+                    Classes.Add((CourseClass)tmp.Key.Clone(), tmp.Value);
+
+                Criteria = new List<bool>(c.Criteria);
                 Fitness = c.Fitness;
             }
             else
             {
                 Slots = new List<List<CourseClass>>(Consts.DayCount * Consts.DayHours * Configuration.Instance.GetNumberOfRooms());
+                for(int i = 0; i < Slots.Capacity; ++i)
+                    Slots.Add(new List<CourseClass>());
+
                 Criteria = new List<bool>(Configuration.Instance.GetNumberOfCourseClasses() * 5);
-                NumberOfCrossoverPoints = c.NumberOfCrossoverPoints;
-                MutationSize = c.MutationSize;
-                MutationProbability = c.MutationProbability;
-                CrossoverProbability = c.CrossoverProbability;
+                for(int i = 0; i < Criteria.Capacity; ++i)
+                    Criteria.Add(false);
+
+                Classes = new Dictionary<CourseClass, int>();
             }
+            NumberOfCrossoverPoints = c.NumberOfCrossoverPoints;
+            MutationSize = c.MutationSize;
+            MutationProbability = c.MutationProbability;
+            CrossoverProbability = c.CrossoverProbability;
         }
 
         // Makes copy ot chromosome
@@ -244,7 +261,7 @@ namespace LessonPlanner
                 int p = classValue.Value;
                 int day = p / daySize;
                 int time = p % daySize;
-                int room = time % Consts.DayHours;
+                int room = time / Consts.DayHours;
                 time = time % Consts.DayHours;
 
                 int duration = classValue.Key.LessonDuration;

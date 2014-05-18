@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LessonPlanner
 {
-    public class CourseClass
+    public class CourseClass : ICloneable
     {
         public Course Course { get; set; }
         public Professor Professor { get; set; }
@@ -35,6 +36,11 @@ namespace LessonPlanner
         public bool ProfessorOverlaps(CourseClass courseClass)
         {
             return Professor.Id == courseClass.Professor.Id;
+        }
+
+        public object Clone()
+        {
+            return MemberwiseClone();
         }
     }
 }

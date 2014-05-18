@@ -38,8 +38,8 @@ namespace LessonPlanner
 
             configuration.Rooms = new Dictionary<int, Room>()
             {
-                {1, new Room() {Id = 1, IsLab = true, SeatCount = 24, Name = "R3"}},
-                {2, new Room(){Id = 2, IsLab = false, SeatCount = 60, Name = "R7"}},
+                {0, new Room() {Id = 0, IsLab = true, SeatCount = 24, Name = "R3"}},
+                {1, new Room(){Id = 1, IsLab = false, SeatCount = 60, Name = "R7"}},
             };
 
             configuration.Courses = new Dictionary<int, Course>();
