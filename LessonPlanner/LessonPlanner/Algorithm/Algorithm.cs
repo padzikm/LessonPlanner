@@ -117,6 +117,7 @@ namespace LessonPlanner
             {
                 Chromosomes.Add(prototype);
                 BestFlags.Add(false);
+
             }
             for (int i = 0; i < trackBest; i++) BestChromosomes.Add(0);
 
