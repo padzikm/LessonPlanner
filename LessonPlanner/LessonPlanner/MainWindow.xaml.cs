@@ -29,10 +29,10 @@ namespace LessonPlanner
             Algorithm algorithm = new Algorithm(100, 8, 5);
             algorithm.Start();
             var bestSchedule = algorithm.GetBestChromosome();
-            Save(bestSchedule);
+            Save(algorithm, bestSchedule);
         }
 
-        private void Save(Schedule schedule)
+        private void Save(Algorithm alg, Schedule schedule)
         {
             foreach (var entry in schedule.Classes)
             {
@@ -62,10 +62,18 @@ namespace LessonPlanner
                             courseClass.IsLabRequired, count),
                 };
 
+                var gen = new TextBlock
+                {
+                    Text = "Generation: " + alg.CurrentGeneration,
+                };
+
                 Grid.SetRow(textblock, row);
                 Grid.SetColumn(textblock, column);
                 Grid.SetRowSpan(textblock, courseClass.LessonDuration);
                 MainGrid.Children.Add(textblock);
+                Grid.SetRow(gen, 0);
+                Grid.SetColumn(gen, 0);
+                MainGrid.Children.Add(gen);
             }
         }
 

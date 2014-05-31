@@ -9,7 +9,9 @@ namespace LessonPlanner
         public Course Course { get; set; }
         public Professor Professor { get; set; }
         public List<StudentGroup> StudentGroups { get; set; }
-        public int StudentCount
+        public int LessonDuration { get; set; }
+        public bool IsLabRequired { get; set; }
+        public int SeatCount
         {
             get
             {
@@ -19,19 +21,15 @@ namespace LessonPlanner
                 return sum;
             }
         }
-        public int LessonDuration { get; set; }
-        public bool IsLabRequired { get; set; }
-
-        public int SeatCount { get; set; }
 
         // Returns TRUE if another class has one or overlapping student groups.
         public bool GroupsOverlap(CourseClass courseClass)
         {
             for (int i = 0; i < StudentGroups.Count; i++)
-                for(int j = 0; j < courseClass.StudentGroups.Count; ++j)
+                for (int j = 0; j < courseClass.StudentGroups.Count; ++j)
                     if (StudentGroups[i].Id == courseClass.StudentGroups[j].Id)
                         return true;
-            
+
             return false;
         }
 
