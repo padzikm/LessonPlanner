@@ -44,7 +44,7 @@ namespace LessonPlanner
             MutationProbability = mutationProbability;
             Fitness = 0;
             // reserve space for time-space slots in chromosomes code
-            Slots = new List<List<CourseClass>>(Consts.DayCount * Consts.DayHours * Configuration.Instance.GetNumberOfRooms() );
+            Slots = new List<List<CourseClass>>(Consts.DayCount * Consts.DayHours * Configuration.Instance.GetNumberOfRooms());
             for (int i = 0; i < Consts.DayCount * Consts.DayHours * Configuration.Instance.GetNumberOfRooms(); i++)
                 Slots.Add(new List<CourseClass>());
 
@@ -78,11 +78,11 @@ namespace LessonPlanner
             else
             {
                 Slots = new List<List<CourseClass>>(Consts.DayCount * Consts.DayHours * Configuration.Instance.GetNumberOfRooms());
-                for(int i = 0; i < Slots.Capacity; ++i)
+                for (int i = 0; i < Slots.Capacity; ++i)
                     Slots.Add(new List<CourseClass>());
 
                 Criteria = new List<bool>(Configuration.Instance.GetNumberOfCourseClasses() * 5);
-                for(int i = 0; i < Criteria.Capacity; ++i)
+                for (int i = 0; i < Criteria.Capacity; ++i)
                     Criteria.Add(false);
 
                 Classes = new Dictionary<CourseClass, int>();
@@ -118,7 +118,7 @@ namespace LessonPlanner
                 int day = random.Next(0, Consts.DayCount);
                 int room = random.Next(0, nr);
                 int time = random.Next(0, Consts.DayHours + 1 - duration);
-                int pos = day*nr*Consts.DayHours + room*Consts.DayHours + time;
+                int pos = day * nr * Consts.DayHours + room * Consts.DayHours + time;
                 // fill time-space slots, for each hour of class
                 for (int i = duration - 1; i >= 0; i--)
                     newChromosome.Slots[pos + i].Add(courseClass);
@@ -142,7 +142,6 @@ namespace LessonPlanner
             Schedule n = new Schedule(this, true);
 
             //// number of classes
-            //int size = (int)_classes.size();
             int size = Classes.Count;
 
             List<bool> cp = new List<bool>(size);
@@ -195,7 +194,7 @@ namespace LessonPlanner
                 k++;
                 j++;
             }
-            CalculateFitness();
+            n.CalculateFitness();
             return n;
         }
 
@@ -275,61 +274,62 @@ namespace LessonPlanner
                         ro = true;
                         break;
                     }
-                    if (!ro)
-                        score++;
-                    Criteria[ci + 0] = !ro;
-                    CourseClass courseClass = classValue.Key;
-                    Room roomInstance = Configuration.Instance.GetRoomById(room);
-                    // does current room have enough seats
-                    Criteria[ci + 1] = roomInstance.SeatCount >= courseClass.SeatCount;
-                    if (Criteria[ci + 1])
-                        score++;
-                    Criteria[ci + 2] = !courseClass.IsLabRequired || courseClass.IsLabRequired && roomInstance.IsLab;
-                    if (Criteria[ci + 1])
-                        score++;
+                }
+                if (!ro)
+                    score++;
+                Criteria[ci] = !ro;
+                CourseClass courseClass = classValue.Key;
+                Room roomInstance = Configuration.Instance.GetRoomById(room);
+                // does current room have enough seats
+                Criteria[ci + 1] = roomInstance.SeatCount >= courseClass.SeatCount;
+                if (Criteria[ci + 1])
+                    score++;
+                Criteria[ci + 2] = !courseClass.IsLabRequired || courseClass.IsLabRequired && roomInstance.IsLab;
+                if (Criteria[ci + 2])
+                    score++;
 
-                    bool po = false, go = false;
-                    // does current room have enough seats
-                    for (int j = numberOfRooms, t = day * daySize + time; j > 0; j--, t += Consts.DayHours)
+                bool po = false, go = false;
+                // does current room have enough seats
+                for (int j = numberOfRooms, t = day * daySize + time; j > 0; j--, t += Consts.DayHours)
+                {
+                    for (int k = duration - 1; k >= 0; k--)
                     {
-                        for (int k = duration - 1; k >= 0; k--)
+                        List<CourseClass> cl = Slots[t + j];
+                        foreach (var clValue in cl)
                         {
-                            List<CourseClass> cl = Slots[t + i];
-                            foreach (var clValue in cl)
+                            if (courseClass != clValue)
                             {
-                                if (courseClass != clValue)
-                                {
-                                    // professor overlaps?
-                                    if (!po && courseClass.ProfessorOverlaps(clValue))
-                                        po = true;
-                                    if (!go && courseClass.GroupsOverlap(clValue))
-                                        go = true;
-                                    if (po && go)
-                                        goto total_overlap;
-                                }
+                                // professor overlaps?
+                                if (!po && courseClass.ProfessorOverlaps(clValue))
+                                    po = true;
+                                if (!go && courseClass.GroupsOverlap(clValue))
+                                    go = true;
+                                if (po && go)
+                                    goto total_overlap;
                             }
                         }
                     }
-                total_overlap:
-                    {
-                        if (!po)
-                            score++;
-                        Criteria[ci + 3] = !po;
-
-                        // student groups has no overlaping classes?
-                        if (!go)
-                            score++;
-                        Criteria[ci + 4] = !go;
-                    }
-
-                    // calculate fitess value based on score
-                    Fitness = (float)score / (Configuration.Instance.GetNumberOfCourseClasses() * Consts.DayCount);
                 }
+            total_overlap:
+                {
+                    if (!po)
+                        score++;
+                    Criteria[ci + 3] = !po;
+
+                    // student groups has no overlaping classes?
+                    if (!go)
+                        score++;
+                    Criteria[ci + 4] = !go;
+                }
+
                 ci += 5;
             }
 
-
+            // calculate fitess value based on score
+            Fitness = (float)score / (Configuration.Instance.GetNumberOfCourseClasses() * Consts.DayCount);
         }
+
+
 
     }
 }
