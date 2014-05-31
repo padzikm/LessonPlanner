@@ -142,8 +142,8 @@ namespace LessonPlanner
             for (int i = 0; i < Chromosomes.Count; ++i)
             {
                 // remove chromosome from previous execution
-                if (Chromosomes[i] != null)
-                    Chromosomes.RemoveAt(i);
+                //if (Chromosomes[i] != null)
+                //    Chromosomes.RemoveAt(i);
 
                 // add new chromosome to population
                 Chromosomes[i] = Prototype.MakeNewFromPrototype();
@@ -170,11 +170,14 @@ namespace LessonPlanner
 
                 // produce offepsing
                 List<Schedule> offspring = new List<Schedule>(ReplaceByGeneration);
+                for(int i = 0; i < ReplaceByGeneration; ++i)
+                    offspring.Add(null);
+
                 for (int j = 0; j < ReplaceByGeneration; ++j)
                 {
                     // selects parent randomly
-                    Schedule p1 = Chromosomes[random.Next() % Chromosomes.Count];
-                    Schedule p2 = Chromosomes[random.Next() % Chromosomes.Count];
+                    Schedule p1 = Chromosomes[random.Next(1000) % Chromosomes.Count];
+                    Schedule p2 = Chromosomes[random.Next(1000) % Chromosomes.Count];
 
                     offspring[j] = p1.Crossover(p2);
                     offspring[j].Mutation();
@@ -193,7 +196,6 @@ namespace LessonPlanner
                     } while (IsInBest(ci));
 
                     // replace chromosomes
-                    Chromosomes[ci] = null;
                     Chromosomes[ci] = offspring[j];
 
                     // try to add new chromosomes in best chromosome group

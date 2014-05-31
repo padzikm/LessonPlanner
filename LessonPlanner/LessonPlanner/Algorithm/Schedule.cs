@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO.Ports;
 using System.Linq;
 using System.Windows;
 
@@ -66,6 +67,8 @@ namespace LessonPlanner
                     var list = new List<CourseClass>(tmp.Count);
                     foreach (var el in tmp)
                         list.Add((CourseClass)el.Clone());
+                    
+                    Slots.Add(list);
                 }
 
                 Classes = new Dictionary<CourseClass, int>(c.Classes.Count);
@@ -145,6 +148,8 @@ namespace LessonPlanner
             int size = Classes.Count;
 
             List<bool> cp = new List<bool>(size);
+            for (int i = 0; i < size; ++i)
+                cp.Add(false);
 
             // determine crossover point (randomly)
             for (int i = NumberOfCrossoverPoints; i > 0; i--)
@@ -160,7 +165,7 @@ namespace LessonPlanner
                 }
             }
             // make new code by combining parent codes
-            bool first = random.Next(2) == 0;
+            bool first = random.Next(1000) % 2 == 0;
 
             for (int i = 0, k = 0, j = 0; i < size; i++, j++, k++)
             {
@@ -186,13 +191,10 @@ namespace LessonPlanner
                     {
                         n.Slots[classValue.Value + x].Add(classValue.Key);
                     }
-                    //crossover point
-                    if (cp[i])
-                        first = !first;
-
                 }
-                k++;
-                j++;
+                //crossover point
+                if (cp[i])
+                    first = !first;
             }
             n.CalculateFitness();
             return n;
@@ -231,18 +233,23 @@ namespace LessonPlanner
                 for (int j = duration - 1; j >= 0; j--)
                 {
                     // remove class hour from current time-space slot
-                    List<CourseClass> cl = Slots[pos1 + 1];
+                    List<CourseClass> cl = Slots[pos1 + j];
                     for (int k = 0; k < cl.Count; k++)
                     {
                         if (cl[k] == cc1)
-                            cl.Remove(cl[k]);
+                        {
+                            cl.RemoveAt(k);
+                            break;
+                        }
                     }
                     // move class hour to new time-space slot
-                    Slots[pos2 + i].Add(cc1);
+                    Slots[pos2 + j].Add(cc1);
                 }
                 // change entry of class table to point to new time-space slots
                 Classes[cc1] = pos2;
             }
+
+            CalculateFitness();
         }
 
         // Calculates fitness value of chromosome
@@ -284,17 +291,18 @@ namespace LessonPlanner
                 Criteria[ci + 1] = roomInstance.SeatCount >= courseClass.SeatCount;
                 if (Criteria[ci + 1])
                     score++;
-                Criteria[ci + 2] = !courseClass.IsLabRequired || courseClass.IsLabRequired && roomInstance.IsLab;
+                Criteria[ci + 2] = !courseClass.IsLabRequired || (courseClass.IsLabRequired && roomInstance.IsLab);
                 if (Criteria[ci + 2])
                     score++;
 
                 bool po = false, go = false;
                 // does current room have enough seats
-                for (int j = numberOfRooms, t = day * daySize + time; j > 0; j--, t += Consts.DayHours)
+                var stop = false;
+                for (int j = numberOfRooms, t = day * daySize + time; j > 0 && !stop; j--, t += Consts.DayHours)
                 {
-                    for (int k = duration - 1; k >= 0; k--)
+                    for (int k = duration - 1; k >= 0 && !stop; k--)
                     {
-                        List<CourseClass> cl = Slots[t + j];
+                        List<CourseClass> cl = Slots[t + k];
                         foreach (var clValue in cl)
                         {
                             if (courseClass != clValue)
@@ -305,22 +313,22 @@ namespace LessonPlanner
                                 if (!go && courseClass.GroupsOverlap(clValue))
                                     go = true;
                                 if (po && go)
-                                    goto total_overlap;
+                                {
+                                    stop = true;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
-            total_overlap:
-                {
-                    if (!po)
-                        score++;
-                    Criteria[ci + 3] = !po;
+                if (!po)
+                    score++;
+                Criteria[ci + 3] = !po;
 
-                    // student groups has no overlaping classes?
-                    if (!go)
-                        score++;
-                    Criteria[ci + 4] = !go;
-                }
+                // student groups has no overlaping classes?
+                if (!go)
+                    score++;
+                Criteria[ci + 4] = !go;
 
                 ci += 5;
             }
@@ -328,8 +336,5 @@ namespace LessonPlanner
             // calculate fitess value based on score
             Fitness = (float)score / (Configuration.Instance.GetNumberOfCourseClasses() * Consts.DayCount);
         }
-
-
-
     }
 }

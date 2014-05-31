@@ -27,9 +27,12 @@ namespace LessonPlanner
         // Returns TRUE if another class has one or overlapping student groups.
         public bool GroupsOverlap(CourseClass courseClass)
         {
-            var commonStudentGroups = StudentGroups.Intersect(courseClass.StudentGroups, new Helper<StudentGroup>());
-
-            return commonStudentGroups.Count() > 0;
+            for (int i = 0; i < StudentGroups.Count; i++)
+                for(int j = 0; j < courseClass.StudentGroups.Count; ++j)
+                    if (StudentGroups[i].Id == courseClass.StudentGroups[j].Id)
+                        return true;
+            
+            return false;
         }
 
         // Returns TRUE if another class has same professor.
