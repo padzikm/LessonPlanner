@@ -87,11 +87,11 @@ namespace LessonPlanner
             CurrentBestSize = 0;
         }
 
-        public Algorithm(int numberOfChromosomes, int replaceByGeneration, int trackBest, Schedule prototype)
+        public Algorithm(int numberOfChromosomes, int replaceByGeneration, int trackBest)
         {
             ReplaceByGeneration = replaceByGeneration;
             CurrentBestSize = 0;
-            Prototype = prototype;
+            Prototype = new Schedule(2, 2, 80, 3);
             CurrentGeneration = 0;
             State = AlgorithmState.Userstopped;
 
@@ -115,7 +115,7 @@ namespace LessonPlanner
             BestChromosomes = new List<int>(trackBest);
             for (int i = 0; i < numberOfChromosomes; i++)
             {
-                Chromosomes.Add(prototype);
+                Chromosomes.Add(null);
                 BestFlags.Add(false);
             }
             for (int i = 0; i < trackBest; i++) BestChromosomes.Add(0);

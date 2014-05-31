@@ -25,8 +25,8 @@ namespace LessonPlanner
         {
             InitializeComponent();
             Configuration.Instance.ParseFile("");
-            Schedule schedule = new Schedule(2, 2, 80, 3);
-            Algorithm algorithm = new Algorithm(100, 8, 5, schedule);
+            //Schedule schedule = new Schedule(2, 2, 80, 3);
+            Algorithm algorithm = new Algorithm(100, 8, 5);
             algorithm.Start();
             var bestSchedule = algorithm.GetBestChromosome();
             Save(bestSchedule);
