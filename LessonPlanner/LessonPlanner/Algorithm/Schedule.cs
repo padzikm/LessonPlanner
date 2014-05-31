@@ -192,8 +192,10 @@ namespace LessonPlanner
                         first = !first;
 
                 }
-                CalculateFitness();
+                k++;
+                j++;
             }
+            CalculateFitness();
             return n;
         }
 

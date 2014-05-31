@@ -66,9 +66,9 @@ namespace LessonPlanner
                             var key = el.Key;
                             int p = el.Value;
                             int t = p % (nr * Consts.DayHours);
-                            int d = p / (nr * Consts.DayHours);
+                            int d = p / (nr * Consts.DayHours) + 1;
                             int r = t / Consts.DayHours;
-                            t = t % Consts.DayHours;
+                            t = t % Consts.DayHours + 1;
                             int l = r % 2;
                             int m = r / 2;
 
@@ -85,7 +85,7 @@ namespace LessonPlanner
                                 found = true;
                             }
                         }
-                        if(!found)
+                        if (!found)
                             result.Append(string.Format("{0,-120}", ""));
                         //result.Append("\t\t");
                     }
@@ -101,9 +101,9 @@ namespace LessonPlanner
                 var key = el.Key;
                 int p = el.Value;
                 int t = p % (nr * Consts.DayHours);
-                int d = p / (nr * Consts.DayHours);
+                int d = p / (nr * Consts.DayHours) + 1;
                 int r = t / Consts.DayHours;
-                t = t % Consts.DayHours;
+                t = t % Consts.DayHours + 1;
                 int l = r % 2;
                 int m = r / 2;
 
@@ -112,11 +112,23 @@ namespace LessonPlanner
                 var professorName = key.Professor.Name;
                 var time = key.LessonDuration;
                 var lab = key.IsLabRequired;
-                result.Append(string.Format("Kurs: {0}\nGrupa: {1}\nProfesor: {2}\nCzas: {3}\nLab: {4}\nd = {5}\nt = {6}", courseName, groupName, professorName, time, lab, d, t + 8));
+                var textBox = new TextBlock
+                {
+                    Text =
+                        string.Format("Kurs: {0}\nGrupa: {1}\nProfesor: {2}\nLab: {3}", courseName, groupName,
+                            professorName, lab)
+                };
+                Grid.SetColumn(textBox, d + l);
+                Grid.SetRow(textBox, t + 2);
+                Grid.SetRowSpan(textBox, time);
+                MainGrid.Children.Add(textBox);
+
+                //result.Append();
                 result.Append("\n\n");
             }
 
-            this.result.Content = result;
+
+            //this.result.Content = result;
         }
     }
 }
